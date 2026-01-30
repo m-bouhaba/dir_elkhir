@@ -2,11 +2,26 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Heart } from "lucide-react";
+import { Menu, X, Heart, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useSession, signOut } from "@/lib/auth/client";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  const [isLoggingOut, startLogoutTransition] = useTransition();
+
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    startLogoutTransition(async () => {
+      await signOut();
+      router.push("/");
+      router.refresh();
+    });
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -44,12 +59,34 @@ export function Header() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" asChild>
-            <Link href="/auth">Sign In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/propose">Propose a Need</Link>
-          </Button>
+          {isPending ? (
+            <Button variant="ghost" disabled>
+              Loading...
+            </Button>
+          ) : session ? (
+            <>
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/auth">Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/propose">Propose a Need</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -93,12 +130,35 @@ export function Header() {
               Dashboard
             </Link>
             <div className="flex flex-col gap-2 pt-4">
-              <Button variant="outline" asChild className="w-full bg-transparent">
-                <Link href="/auth">Sign In</Link>
-              </Button>
-              <Button asChild className="w-full">
-                <Link href="/propose">Propose a Need</Link>
-              </Button>
+              {isPending ? (
+                <Button variant="outline" disabled className="w-full bg-transparent">
+                  Loading...
+                </Button>
+              ) : session ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full bg-transparent"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {isLoggingOut ? "Logging out..." : "Logout"}
+                  </Button>
+                  <Button asChild className="w-full">
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" asChild className="w-full bg-transparent">
+                    <Link href="/auth">Sign In</Link>
+                  </Button>
+                  <Button asChild className="w-full">
+                    <Link href="/propose">Propose a Need</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
