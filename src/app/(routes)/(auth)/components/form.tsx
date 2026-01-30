@@ -17,11 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { SignUpSchema, SignUpValues } from "./validate";
-import InputStartIcon from "../components/input-start-icon";
-import InputPasswordContainer from "../components/input-password";
+import InputStartIcon from "./input-start-icon";
+import InputPasswordContainer from "./input-password";
 import { cn } from "@/lib/utils";
 import { AtSign, MailIcon, UserIcon } from "lucide-react";
-import { GenderRadioGroup } from "../components/gender-radio-group";
+import { GenderRadioGroup } from "./gender-radio-group";
 
 export default function SignUpForm() {
   const [isPending, startTransition] = useTransition();

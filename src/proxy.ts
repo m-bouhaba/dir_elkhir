@@ -4,7 +4,8 @@ import { getSessionCookie } from "better-auth/cookies";
 import {
   apiAuthPrefix,
   authRoutes,
-  DEFAULT_LOGIN_REDIRECT,
+  defaultLoginRedirect,
+  protectedRoutes,
   publicRoutes,
 } from "./routes";
 
@@ -26,13 +27,16 @@ export async function proxy(request: NextRequest) {
   if (isAuthRoute()) {
     if (session) {
       return NextResponse.redirect(
-        new URL(DEFAULT_LOGIN_REDIRECT, request.url),
+        new URL(defaultLoginRedirect, request.url),
       );
     }
     return NextResponse.next();
   }
 
-  if (!session && !isPublicRoute) {
+  const isProtectedRoute = protectedRoutes.some((path) =>
+    request.nextUrl.pathname.startsWith(path),
+  );
+  if (isProtectedRoute && !session) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -48,6 +52,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.\\.(?:svg|png|jpg|jpeg|gif|webp)$).)",
   ],
 };
